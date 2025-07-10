@@ -1,0 +1,30 @@
+body {
+    padding-top: 60px;
+    background-color: #f8f9fa;
+}
+
+header {
+    background: #343a40;
+    color: white;
+    padding: 10px 20px;
+}
+
+header h1 {
+    margin: 0;
+}
+
+footer {
+    background: #343a40;
+    color: white;
+    padding: 10px 20px;
+    text-align: center;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+}
+
+.sidebar {
+    min-height: 100vh;
+    padding: 10px;
+    background-color: #e9ecef;
+}

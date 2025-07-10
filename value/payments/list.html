@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% block title %}Payments{% endblock %}
+{% block content %}
+<h2>Payments</h2>
+<table class="table">
+<thead><tr><th>Student</th><th>Amount</th></tr></thead>
+<tbody>
+{% for payment in payments %}
+<tr><td>{{ payment.student }}</td><td>{{ payment.amount }}</td></tr>
+{% endfor %}
+</tbody>
+</table>
+{% endblock %}

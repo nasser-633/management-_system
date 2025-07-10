@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% block title %}Teachers{% endblock %}
+{% block content %}
+<h2>Teachers</h2>
+<table class="table table-striped">
+  <thead><tr><th>Name</th><th>Subjects</th></tr></thead>
+  <tbody>
+  {% for teacher in teachers %}
+    <tr>
+      <td>{{ teacher.user.username }}</td>
+      <td>
+        {% for s in teacher.subjects.all %}{{ s.name }}{% if not forloop.last %}, {% endif %}{% endfor %}
+      </td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}
