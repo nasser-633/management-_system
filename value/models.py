@@ -14,7 +14,7 @@ class User(AbstractUser):
 
 
 # 🔷 Core models
-class Class(models.Model):
+class Classroom(models.Model):
     name = models.CharField(max_length=50)
 
     def __str__(self):
@@ -28,18 +28,12 @@ class Subject(models.Model):
         return self.name
 
 
-class Room(models.Model):
-    name = models.CharField(max_length=50)
-
-    def __str__(self):
-        return self.name
-
-
 # 🔷 Teacher & Student
 class Teacher(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     subjects = models.ManyToManyField(Subject)
-    classes = models.ManyToManyField(Class)
+    classes = models.ManyToManyField(Classroom)
+    Grade = models.CharField(max_length=10, blank=True, null=True)
 
     def __str__(self):
         return self.user.username
@@ -47,7 +41,7 @@ class Teacher(models.Model):
 
 class Student(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    student_class = models.ForeignKey(Class, on_delete=models.SET_NULL, null=True)
+    student_class = models.ForeignKey(Classroom, on_delete=models.SET_NULL, null=True)
 
     def __str__(self):
         return self.user.username
@@ -104,7 +98,7 @@ class ExamGrade(models.Model):
     grade = models.CharField(max_length=2)
 
 
-class ExamTemporary(models.Model):
+class ExamTimetable(models.Model):
     exam = models.ForeignKey(Exam, on_delete=models.CASCADE)
     notes = models.TextField()
 
@@ -144,7 +138,7 @@ class StudentPaymentHistory(models.Model):
     new_amount = models.DecimalField(max_digits=8, decimal_places=2)
 
 
-class PaymentRatifications(models.Model):
+class PaymentNotifications(models.Model):
     payment = models.ForeignKey(StudentPayment, on_delete=models.CASCADE)
     approved_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     approved_at = models.DateTimeField(auto_now_add=True)
@@ -200,8 +194,39 @@ class Temporary(models.Model):
 class SubjectRoutine(models.Model):
     subject = models.ForeignKey(Subject, on_delete=models.CASCADE)
     teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE)
-    student_class = models.ForeignKey(Class, on_delete=models.CASCADE)
-    room = models.ForeignKey(Room, on_delete=models.CASCADE)
+    student_class = models.ForeignKey(Classroom, on_delete=models.CASCADE)
     day_of_week = models.CharField(max_length=10)
     start_time = models.TimeField()
     end_time = models.TimeField()
+    
+class PettyCash(models.Model):
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    description = models.TextField()
+    date = models.DateField(auto_now_add=True)      
+    
+class PettyCashHistory(models.Model):
+    pettyCash = models.ForeignKey(PettyCash, on_delete=models.CASCADE)
+    changed_at = models.DateTimeField(auto_now_add=True)
+    old_amount = models.DecimalField(max_digits=10, decimal_places=2)
+    new_amount = models.DecimalField(max_digits=10, decimal_places=2)   
+    
+class Grade(models.Model):
+    name = models.CharField(max_length=50)
+    description = models.TextField()
+
+    def __str__(self):
+        return self.name
+    
+class Timetable(models.Model):  
+    class_name = models.ForeignKey(Classroom, on_delete=models.CASCADE)
+    subject = models.ForeignKey(Subject, on_delete=models.CASCADE)
+    teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE)
+    day_of_week = models.CharField(max_length=10)
+    start_time = models.TimeField()
+    end_time = models.TimeField()
+
+    def __str__(self):
+        return f"{self.class_name} - {self.subject} ({self.day_of_week})"
+    
+    
+           

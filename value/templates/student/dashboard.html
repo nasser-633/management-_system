@@ -1,6 +1,61 @@
-{% extends 'base.html' %}
+{% extends 'value/base_dashboard.html' %} {# IMPORTANT: Changed to extend the new base dashboard template #}
+
 {% block title %}Student Dashboard{% endblock %}
+{% block header_title %}Student Dashboard{% endblock %} {# Added for the main content header #}
+
 {% block content %}
-<h2>Student Dashboard</h2>
-<p>Welcome {{ request.user.username }}</p>
+<div class="p-6 bg-white rounded-xl shadow-lg">
+    <h2 class="text-3xl font-bold text-gray-800 mb-6">Student Dashboard</h2>
+    <p class="text-xl text-gray-700">Welcome, <span class="font-semibold text-blue-700">{{ request.user.username }}</span>!</p>
+
+    <div class="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div class="bg-indigo-50 p-6 rounded-lg shadow-md flex items-center justify-between">
+            <div>
+                <h3 class="text-lg font-semibold text-indigo-800">My Class</h3>
+                <p class="text-3xl font-extrabold text-indigo-900 mt-1">
+                    {% if student.student_class %}
+                        {{ student.student_class.name }}
+                    {% else %}
+                        N/A
+                    {% endif %}
+                </p>
+            </div>
+            <svg class="w-10 h-10 text-indigo-600 opacity-75" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+        </div>
+        <div class="bg-pink-50 p-6 rounded-lg shadow-md flex items-center justify-between">
+            <div>
+                <h3 class="text-lg font-semibold text-pink-800">My Subjects</h3>
+                <p class="text-3xl font-extrabold text-pink-900 mt-1">6</p> {# Placeholder, replace with actual data from SubjectRoutine or similar #}
+            </div>
+            <svg class="w-10 h-10 text-pink-600 opacity-75" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5s3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18s-3.332.477-4.5 1.253"></path></svg>
+        </div>
+        <div class="bg-teal-50 p-6 rounded-lg shadow-md flex items-center justify-between">
+            <div>
+                <h3 class="text-lg font-semibold text-teal-800">Upcoming Exams</h3>
+                <p class="text-3xl font-extrabold text-teal-900 mt-1">1</p> {# Placeholder, replace with actual data #}
+            </div>
+            <svg class="w-10 h-10 text-teal-600 opacity-75" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
+        </div>
+    </div>
+
+    <div class="mt-8">
+        <h3 class="text-2xl font-bold text-gray-800 mb-4">Your Grades (Placeholder)</h3>
+        <p class="text-gray-600">This section will display your recent grades and academic performance.</p>
+        <ul class="list-disc list-inside mt-2 text-gray-700">
+            <li>Math: A-</li>
+            <li>Science: B+</li>
+            <li>History: A</li>
+        </ul>
+    </div>
+
+    <div class="mt-8">
+        <h3 class="text-2xl font-bold text-gray-800 mb-4">Quick Links</h3>
+        <ul class="space-y-2">
+            <li><a href="{% url 'value:exam_list' %}" class="text-blue-600 hover:underline">View Exam Schedule</a></li>
+            <li><a href="{% url 'value:payment_list' %}" class="text-blue-600 hover:underline">View Payment History</a></li>
+            <li><a href="{% url 'value:chat_room' %}" class="text-blue-600 hover:underline">Go to Chat Room</a></li>
+            {# Add more student-specific links here #}
+        </ul>
+    </div>
+</div>
 {% endblock %}

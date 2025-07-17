@@ -86,7 +86,7 @@
       <button type="submit" class="btn btn-success mt-3">Register</button>
     </form>
 
-    <p class="mt-3">Already have an account? <a href="{% url 'login_view' %}">Log in here</a>.</p>
+    <p class="mt-3">Already have an account? <a href="{% url 'value:login_view' %}">Log in here</a>.</p> {# IMPORTANT: Changed to namespaced URL #}
   </div>
 </div>
 {% endblock %}

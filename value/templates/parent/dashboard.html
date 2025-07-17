@@ -1,6 +1,64 @@
-{% extends 'base.html' %}
+{% extends 'value/base_dashboard.html' %} {# IMPORTANT: Changed to extend the new base dashboard template #}
+
 {% block title %}Parent Dashboard{% endblock %}
+{% block header_title %}Parent Dashboard{% endblock %} {# Added for the main content header #}
+
 {% block content %}
-<h2>Parent Dashboard</h2>
-<p>Welcome {{ request.user.username }}</p>
+<div class="p-6 bg-white rounded-xl shadow-lg">
+    <h2 class="text-3xl font-bold text-gray-800 mb-6">Parent Dashboard</h2>
+    <p class="text-xl text-gray-700">Welcome, <span class="font-semibold text-blue-700">{{ request.user.username }}</span>!</p>
+
+    <div class="mt-8">
+        <h3 class="text-2xl font-bold text-gray-800 mb-4">My Child's Information</h3>
+        {% comment %}
+            To display child's info, you would need to fetch the Parent object
+            in the parent_dashboard view and pass it to the context, like:
+            parent_profile = Parent.objects.get(user=request.user)
+            context = {'parent_profile': parent_profile}
+            Then access parent_profile.student.user.username, etc.
+        {% endcomment %}
+        <div class="bg-gray-50 p-6 rounded-lg shadow-md">
+            {% if parent_profile and parent_profile.student %}
+                <p class="text-lg text-gray-700">Child's Name: <span class="font-semibold">{{ parent_profile.student.user.username }}</span></p>
+                <p class="text-lg text-gray-700">Child's Class: <span class="font-semibold">
+                    {% if parent_profile.student.student_class %}
+                        {{ parent_profile.student.student_class.name }}
+                    {% else %}
+                        N/A
+                    {% endif %}
+                </span></p>
+                {# Add more student details here like grades, attendance summary #}
+            {% else %}
+                <p class="text-lg text-gray-600">No associated student found. Please contact the school administration.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="bg-purple-50 p-6 rounded-lg shadow-md flex items-center justify-between">
+            <div>
+                <h3 class="text-lg font-semibold text-purple-800">Payment Status</h3>
+                <p class="text-3xl font-extrabold text-purple-900 mt-1">Due</p> {# Placeholder, replace with actual data #}
+            </div>
+            <svg class="w-10 h-10 text-purple-600 opacity-75" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+        </div>
+        <div class="bg-orange-50 p-6 rounded-lg shadow-md flex items-center justify-between">
+            <div>
+                <h3 class="text-lg font-semibold text-orange-800">Upcoming Events</h3>
+                <p class="text-3xl font-extrabold text-orange-900 mt-1">3</p> {# Placeholder, replace with actual data #}
+            </div>
+            <svg class="w-10 h-10 text-orange-600 opacity-75" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+        </div>
+    </div>
+
+    <div class="mt-8">
+        <h3 class="text-2xl font-bold text-gray-800 mb-4">Quick Links</h3>
+        <ul class="space-y-2">
+            <li><a href="{% url 'value:payment_list' %}" class="text-blue-600 hover:underline">View Payment History</a></li>
+            <li><a href="{% url 'value:event_list' %}" class="text-blue-600 hover:underline">View School Events</a></li>
+            <li><a href="{% url 'value:chat_room' %}" class="text-blue-600 hover:underline">Contact Teachers/Admin</a></li>
+            {# Add more parent-specific links here #}
+        </ul>
+    </div>
+</div>
 {% endblock %}

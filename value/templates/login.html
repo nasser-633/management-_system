@@ -16,7 +16,7 @@
         </ul>
     {% endif %}
 
-    <form method="post" action="{% url 'login_view' %}"> {# Explicitly setting action for clarity #}
+    <form method="post" action="{% url 'value:login_view' %}"> {# IMPORTANT: Changed to namespaced URL #}
       {% csrf_token %}
       
       <div class="form-group mb-3">
@@ -47,7 +47,7 @@
       <button type="submit" class="btn btn-primary mt-3">Log In</button> {# IMPORTANT: type="submit" ensures the form submits #}
     </form>
 
-    <p class="mt-3">Don't have an account? <a href="{% url 'register' %}">Register here</a>.</p>
+    <p class="mt-3">Don't have an account? <a href="{% url 'value:register' %}">Register here</a>.</p> {# IMPORTANT: Changed to namespaced URL #}
   </div>
 </div>
 {% endblock %}
