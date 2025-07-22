@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel</title>
+    {% load static %}
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/fontawesome.css' %}" crossorigin="anonymous">
+    <style>
+        .sidebar {
+            width: 250px;
+            position: fixed;
+            height: 100%;
+            background: #2a4365;
+            padding-top: 20px;
+            overflow-y: auto; /* Enable scrolling for long sidebars */
+        }
+        .sidebar a {
+            padding: 10px 15px;
+            text-decoration: none;
+            font-size: 18px;
+            color: white;
+            display: block;
+        }
+        .sidebar a:hover, .sidebar a.active { /* Add active class styling */
+            background-color: #3182ce;
+        }
+        .content {
+            margin-left: 250px;
+            padding: 20px;
+            flex-grow: 1; /* Allow content to grow */
+        }
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        /* Basic table styling for lists */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+        th, td {
+            border: 1px solid #e2e8f0;
+            padding: 0.75rem;
+            text-align: left;
+        }
+        th {
+            background-color: #edf2f7;
+            font-weight: bold;
+        }
+        /* Styles for chat messages */
+        .chat-message-bubble {
+            background-color: #f3f4f6;
+            border-radius: 0.5rem;
+            padding: 0.75rem 1rem;
+            margin-bottom: 0.5rem;
+            max-width: 80%;
+        }
+        .chat-message-bubble.sent {
+            background-color: #e0f2fe;
+            align-self: flex-end;
+            text-align: right;
+        }
+        .chat-message-bubble.received {
+            background-color: #f0fdf4;
+            align-self: flex-start;
+            text-align: left;
+        }
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            height: 400px; /* Fixed height for scrollable chat */
+            overflow-y: auto;
+            border: 1px solid #e2e8f0;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            background-color: #ffffff;
+        }
+    </style>
+</head>
+<body>
+    <div class="flex min-h-screen"> {# Added min-h-screen for full height layout #}
+        <div class="sidebar">
+            <h2 class="text-white text-2xl p-4">Admin Panel</h2>
+            {# Apply 'active' class based on active_view context variable #}
+            <a href="{% url 'value:dashboard_home' %}" class="{% if active_view == 'home' %}active{% endif %}"><i class="fas fa-home"></i> Dashboard</a>
+            <a href="{% url 'value:dashboard_user_list' %}" class="{% if active_view == 'users' %}active{% endif %}"><i class="fas fa-users"></i> Users</a>
+            <a href="{% url 'value:dashboard_student_list' %}" class="{% if active_view == 'students' %}active{% endif %}"><i class="fas fa-user-graduate"></i> Students</a>
+            <a href="{% url 'value:dashboard_teacher_list' %}" class="{% if active_view == 'teachers' %}active{% endif %}"><i class="fas fa-chalkboard-teacher"></i> Teachers</a>
+            <a href="{% url 'value:dashboard_classroom_list' %}" class="{% if active_view == 'classrooms' %}active{% endif %}"><i class="fas fa-building"></i> Classrooms</a>
+            <a href="{% url 'value:payment_list' %}" class="{% if active_view == 'payments' %}active{% endif %}"><i class="fas fa-money-bill-wave"></i> Fees</a>
+            <a href="{% url 'value:event_list' %}" class="{% if active_view == 'events' %}active{% endif %}"><i class="fas fa-calendar-alt"></i> Events</a>
+            <a href="{% url 'value:petty_cash_list' %}" class="{% if active_view == 'petty_cash' %}active{% endif %}"><i class="fas fa-wallet"></i> Petty Cash</a> {# Changed URL to petty_cash_list #}
+            <a href="{% url 'value:exam_list' %}" class="{% if active_view == 'exams' %}active{% endif %}"><i class="fas fa-book"></i> Exams</a> {# Added Exams link #}
+            <a href="{% url 'value:chat_room' %}" class="{% if active_view == 'chat_room' %}active{% endif %}"><i class="fas fa-comments"></i> Online Chats</a>
+            <a href="{% url 'value:group_chat' %}" class="{% if active_view == 'group_chat' %}active{% endif %}"><i class="fas fa-users-rectangle"></i> Group Chat</a> {# Added Group Chat link #}
+            <a href="{% url 'value:friends_list' %}" class="{% if active_view == 'friends_list' %}active{% endif %}"><i class="fas fa-user-friends"></i> Friends</a> {# Added Friends link #}
+            <a href="{% url 'value:logout_view' %}" class=""><i class="fas fa-sign-out-alt"></i> Logout</a>
+            <p class="text-white p-4">({{ request.user.username|upper }})</p>
+        </div>
+        <div class="content">
+            {# Messages container #}
+            {% if messages %}
+                <div class="mb-4">
+                    {% for message in messages %}
+                        <div class="p-3 mb-2 rounded
+                            {% if message.tags == 'success' %}bg-green-100 text-green-700{% endif %}
+                            {% if message.tags == 'error' %}bg-red-100 text-red-700{% endif %}
+                            {% if message.tags == 'warning' %}bg-yellow-100 text-yellow-700{% endif %}
+                            {% if message.tags == 'info' %}bg-blue-100 text-blue-700{% endif %}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            {# Conditional rendering based on active_view #}
+
+            {% if active_view == 'home' %}
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h1 class="text-2xl font-bold mb-4">Dashboard Home</h1>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div class="bg-blue-100 p-4 rounded-lg text-center shadow-sm">
+                            <h3 class="text-lg font-semibold">Total Students</h3>
+                            <p class="text-3xl font-bold text-blue-800" id="totalStudents">{{ total_students }}</p>
+                            <a href="{% url 'value:dashboard_student_list' %}" class="mt-2 inline-block bg-blue-500 text-white p-2 rounded hover:bg-blue-600">Manage Students</a>
+                        </div>
+                        <div class="bg-green-100 p-4 rounded-lg text-center shadow-sm">
+                            <h3 class="text-lg font-semibold">Total Teachers</h3>
+                            <p class="text-3xl font-bold text-green-800">{{ total_teachers }}</p>
+                            <a href="{% url 'value:dashboard_teacher_list' %}" class="mt-2 inline-block bg-green-500 text-white p-2 rounded hover:bg-green-600">Manage Teachers</a>
+                        </div>
+                        <div class="bg-purple-100 p-4 rounded-lg text-center shadow-sm">
+                            <h3 class="text-lg font-semibold">Total Users</h3>
+                            <p class="text-3xl font-bold text-purple-800">{{ total_users }}</p>
+                            <a href="{% url 'value:dashboard_user_list' %}" class="mt-2 inline-block bg-purple-500 text-white p-2 rounded hover:bg-purple-600">Manage Users</a>
+                        </div>
+                        <div class="bg-yellow-100 p-4 rounded-lg text-center shadow-sm">
+                            <h3 class="text-lg font-semibold">Total Classrooms</h3>
+                            <p class="text-3xl font-bold text-yellow-800">{{ total_classrooms }}</p>
+                            <a href="{% url 'value:dashboard_classroom_list' %}" class="mt-2 inline-block bg-yellow-500 text-white p-2 rounded hover:bg-yellow-600">Manage Classrooms</a>
+                        </div>
+                        {# You can add more cards here for other totals like Events, Payments, Exams if needed #}
+                    </div>
+
+                    <div class="mt-6 bg-white p-6 rounded-lg shadow-md">
+                        <h3 class="text-xl font-semibold mb-4">Add/Delete Student</h3>
+                        <form method="POST" action="{% url 'value:dashboard_home' %}">
+                            {% csrf_token %}
+                            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+                                <input type="text" name="username" placeholder="Username" class="border p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <input type="password" name="password" placeholder="Password" class="border p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <input type="password" name="password2" placeholder="Confirm Password" class="border p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <input type="text" name="grade" placeholder="Classroom ID (optional)" class="border p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <input type="hidden" name="role" value="student">
+                                <input type="hidden" name="action" value="add_student">
+                            </div>
+                            <button type="submit" class="bg-green-500 text-white p-3 rounded hover:bg-green-600">Add Student</button>
+                        </form>
+                        <form method="POST" action="{% url 'value:dashboard_home' %}" class="mt-4">
+                            {% csrf_token %}
+                            <div class="flex items-center space-x-2">
+                                <input type="text" name="username" placeholder="Username to delete" class="border p-2 rounded focus:outline-none focus:ring-2 focus:ring-red-500">
+                                <input type="hidden" name="action" value="delete_student">
+                                <button type="submit" class="bg-red-500 text-white p-3 rounded hover:bg-red-600">Delete Student</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+            {% elif active_view == 'users' %}
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h1 class="text-2xl font-bold mb-4">All Users</h1>
+                    <table class="min-w-full bg-white">
+                        <thead>
+                            <tr>
+                                <th class="py-2 px-4 border-b">ID</th>
+                                <th class="py-2 px-4 border-b">Username</th>
+                                <th class="py-2 px-4 border-b">Email</th>
+                                <th class="py-2 px-4 border-b">Role</th>
+                                <th class="py-2 px-4 border-b">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user in users %}
+                                <tr>
+                                    <td class="py-2 px-4 border-b">{{ user.id }}</td>
+                                    <td class="py-2 px-4 border-b">{{ user.username }}</td>
+                                    <td class="py-2 px-4 border-b">{{ user.email|default:"N/A" }}</td>
+                                    <td class="py-2 px-4 border-b">{{ user.role|default:"N/A"|capfirst }}</td>
+                                    <td class="py-2 px-4 border-b">
+                                        {# Consider adding actual links for view/edit/delete #}
+                                        <a href="#" class="text-blue-500 hover:text-blue-700">View</a> |
+                                        <a href="#" class="text-yellow-500 hover:text-yellow-700">Edit</a> |
+                                        <a href="#" class="text-red-500 hover:text-red-700">Delete</a>
+                                    </td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="5" class="py-4 px-4 text-center text-gray-500">No users found.</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+            {% elif active_view == 'students' %}
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h1 class="text-2xl font-bold mb-4">All Students</h1>
+                    <table class="min-w-full bg-white">
+                        <thead>
+                            <tr>
+                                <th class="py-2 px-4 border-b">ID</th>
+                                <th class="py-2 px-4 border-b">Username</th>
+                                <th class="py-2 px-4 border-b">Email</th>
+                                <th class="py-2 px-4 border-b">Classroom</th>
+                                <th class="py-2 px-4 border-b">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for student in students %}
+                                <tr>
+                                    <td class="py-2 px-4 border-b">{{ student.id }}</td>
+                                    <td class="py-2 px-4 border-b">{{ student.user.username }}</td>
+                                    <td class="py-2 px-4 border-b">{{ student.user.email|default:"N/A" }}</td>
+                                    <td class="py-2 px-4 border-b">{{ student.student_class.name|default:'N/A' }}</td>
+                                    <td class="py-2 px-4 border-b">
+                                        <a href="{% url 'value:student_detail' student.id %}" class="text-blue-500 hover:text-blue-700">View</a> |
+                                        <a href="#" class="text-yellow-500 hover:text-yellow-700">Edit</a> |
+                                        <a href="#" class="text-red-500 hover:text-red-700">Delete</a>
+                                    </td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="5" class="py-4 px-4 text-center text-gray-500">No students found.</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+            {% elif active_view == 'teachers' %}
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h1 class="text-2xl font-bold mb-4">All Teachers</h1>
+                    <table class="min-w-full bg-white">
+                        <thead>
+                            <tr>
+                                <th class="py-2 px-4 border-b">ID</th>
+                                <th class="py-2 px-4 border-b">Username</th>
+                                <th class="py-2 px-4 border-b">Email</th>
+                                <th class="py-2 px-4 border-b">Subjects Taught</th>
+                                <th class="py-2 px-4 border-b">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for teacher in teachers %}
+                                <tr>
+                                    <td class="py-2 px-4 border-b">{{ teacher.id }}</td>
+                                    <td class="py-2 px-4 border-b">{{ teacher.user.username }}</td>
+                                    <td class="py-2 px-4 border-b">{{ teacher.user.email|default:"N/A" }}</td>
+                                    <td class="py-2 px-4 border-b">
+                                        {% for subject in teacher.subjects.all %}
+                                            {{ subject.name }}{% if not forloop.last %}, {% endif %}
+                                        {% empty %}
+                                            N/A
+                                        {% endfor %}
+                                    </td>
+                                    <td class="py-2 px-4 border-b">
+                                        <a href="{% url 'value:teacher_detail' teacher.id %}" class="text-blue-500 hover:text-blue-700">View</a> |
+                                        <a href="#" class="text-yellow-500 hover:text-yellow-700">Edit</a> |
+                                        <a href="#" class="text-red-500 hover:text-red-700">Delete</a>
+                                    </td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="5" class="py-4 px-4 text-center text-gray-500">No teachers found.</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+            {% elif active_view == 'classrooms' %}
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h1 class="text-2xl font-bold mb-4">All Classrooms</h1>
+                    <table class="min-w-full bg-white">
+                        <thead>
+                            <tr>
+                                <th class="py-2 px-4 border-b">ID</th>
+                                <th class="py-2 px-4 border-b">Name</th>
+                                <th class="py-2 px-4 border-b">Capacity</th>
+                                <th class="py-2 px-4 border-b">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for classroom in classrooms %}
+                                <tr>
+                                    <td class="py-2 px-4 border-b">{{ classroom.id }}</td>
+                                    <td class="py-2 px-4 border-b">{{ classroom.name }}</td>
+                                    <td class="py-2 px-4 border-b">{{ classroom.capacity|default:'N/A' }}</td>
+                                    <td class="py-2 px-4 border-b">
+                                        <a href="#" class="text-blue-500 hover:text-blue-700">View</a> |
+                                        <a href="#" class="text-yellow-500 hover:text-yellow-700">Edit</a> |
+                                        <a href="#" class="text-red-500 hover:text-red-700">Delete</a>
+                                    </td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="4" class="py-4 px-4 text-center text-gray-500">No classrooms found.</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+            {% elif active_view == 'payments' %}
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h1 class="text-2xl font-bold mb-4">All Fees / Payments</h1>
+                    <table class="min-w-full bg-white">
+                        <thead>
+                            <tr>
+                                <th class="py-2 px-4 border-b">ID</th>
+                                <th class="py-2 px-4 border-b">Student</th>
+                                <th class="py-2 px-4 border-b">Amount</th>
+                                <th class="py-2 px-4 border-b">Date</th>
+                                <th class="py-2 px-4 border-b">Description</th>
+                                <th class="py-2 px-4 border-b">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for payment in payments %}
+                                <tr>
+                                    <td class="py-2 px-4 border-b">{{ payment.id }}</td>
+                                    <td class="py-2 px-4 border-b">{{ payment.student.user.username|default:"N/A" }}</td>
+                                    <td class="py-2 px-4 border-b">{{ payment.amount }}</td>
+                                    <td class="py-2 px-4 border-b">{{ payment.date|date:"M d, Y" }}</td>
+                                    <td class="py-2 px-4 border-b">{{ payment.description|default:"N/A" }}</td>
+                                    <td class="py-2 px-4 border-b">
+                                        <a href="{% url 'value:payment_detail' payment.id %}" class="text-blue-500 hover:text-blue-700">View</a> |
+                                        <a href="#" class="text-yellow-500 hover:text-yellow-700">Edit</a> |
+                                        <a href="#" class="text-red-500 hover:text-red-700">Delete</a>
+                                    </td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="6" class="py-4 px-4 text-center text-gray-500">No payments found.</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {# Add form for adding new payment if needed here #}
+                </div>
+
+            {% elif active_view == 'events' %}
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h1 class="text-2xl font-bold mb-4">All Events</h1>
+                    <table class="min-w-full bg-white">
+                        <thead>
+                            <tr>
+                                <th class="py-2 px-4 border-b">ID</th>
+                                <th class="py-2 px-4 border-b">Title</th>
+                                <th class="py-2 px-4 border-b">Date</th>
+                                <th class="py-2 px-4 border-b">Time</th>
+                                <th class="py-2 px-4 border-b">Location</th>
+                                <th class="py-2 px-4 border-b">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for event in events %}
+                                <tr>
+                                    <td class="py-2 px-4 border-b">{{ event.id }}</td>
+                                    <td class="py-2 px-4 border-b">{{ event.title }}</td>
+                                    <td class="py-2 px-4 border-b">{{ event.date|date:"M d, Y" }}</td>
+                                    <td class="py-2 px-4 border-b">{{ event.time|time:"h:i A" }}</td>
+                                    <td class="py-2 px-4 border-b">{{ event.location|default:"N/A" }}</td>
+                                    <td class="py-2 px-4 border-b">
+                                        <a href="{% url 'value:event_detail' event.id %}" class="text-blue-500 hover:text-blue-700">View</a> |
+                                        <a href="#" class="text-yellow-500 hover:text-yellow-700">Edit</a> |
+                                        <a href="#" class="text-red-500 hover:text-red-700">Delete</a>
+                                    </td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="6" class="py-4 px-4 text-center text-gray-500">No events found.</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {# Add form for adding new event if needed here #}
+                </div>
+
+            {% elif active_view == 'petty_cash' %}
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h1 class="text-2xl font-bold mb-4">Petty Cash Entries</h1>
+                    <table class="min-w-full bg-white">
+                        <thead>
+                            <tr>
+                                <th class="py-2 px-4 border-b">ID</th>
+                                <th class="py-2 px-4 border-b">Date</th>
+                                <th class="py-2 px-4 border-b">Description</th>
+                                <th class="py-2 px-4 border-b">Amount</th>
+                                <th class="py-2 px-4 border-b">Recorded By</th>
+                                <th class="py-2 px-4 border-b">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for entry in petty_cash_entries %} {# Using petty_cash_entries from context #}
+                                <tr>
+                                    <td class="py-2 px-4 border-b">{{ entry.id }}</td>
+                                    <td class="py-2 px-4 border-b">{{ entry.date|date:"M d, Y" }}</td>
+                                    <td class="py-2 px-4 border-b">{{ entry.description }}</td>
+                                    <td class="py-2 px-4 border-b">{{ entry.amount }}</td>
+                                    <td class="py-2 px-4 border-b">{{ entry.recorded_by.username|default:"N/A" }}</td>
+                                    <td class="py-2 px-4 border-b">
+                                        <a href="#" class="text-blue-500 hover:text-blue-700">View</a> |
+                                        <a href="#" class="text-yellow-500 hover:text-yellow-700">Edit</a> |
+                                        <a href="#" class="text-red-500 hover:text-red-700">Delete</a>
+                                    </td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="6" class="py-4 px-4 text-center text-gray-500">No petty cash entries found.</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {# Add form for adding new petty cash entry if needed here #}
+                </div>
+
+            {% elif active_view == 'exams' %}
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h1 class="text-2xl font-bold mb-4">All Exams</h1>
+                    <table class="min-w-full bg-white">
+                        <thead>
+                            <tr>
+                                <th class="py-2 px-4 border-b">ID</th>
+                                <th class="py-2 px-4 border-b">Title</th>
+                                <th class="py-2 px-4 border-b">Subject</th>
+                                <th class="py-2 px-4 border-b">Date</th>
+                                <th class="py-2 px-4 border-b">Max Marks</th>
+                                <th class="py-2 px-4 border-b">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for exam in exams %}
+                                <tr>
+                                    <td class="py-2 px-4 border-b">{{ exam.id }}</td>
+                                    <td class="py-2 px-4 border-b">{{ exam.title }}</td>
+                                    <td class="py-2 px-4 border-b">{{ exam.subject.name|default:"N/A" }}</td>
+                                    <td class="py-2 px-4 border-b">{{ exam.date|date:"M d, Y" }}</td>
+                                    <td class="py-2 px-4 border-b">{{ exam.max_marks|default:"N/A" }}</td>
+                                    <td class="py-2 px-4 border-b">
+                                        <a href="{% url 'value:exam_detail' exam.id %}" class="text-blue-500 hover:text-blue-700">View</a> |
+                                        <a href="#" class="text-yellow-500 hover:text-yellow-700">Edit</a> |
+                                        <a href="#" class="text-red-500 hover:text-red-700">Delete</a>
+                                    </td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="6" class="py-4 px-4 text-center text-gray-500">No exams found.</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {# Add form for adding new exam if needed here #}
+                </div>
+
+            {% elif active_view == 'chat_room' %}
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h1 class="text-2xl font-bold mb-4">Online Chats (One-on-One)</h1>
+                    <div class="chat-container mb-4">
+                        {% for message in chat_messages %}
+                            <div class="chat-message-bubble {% if message.sender == request.user %}sent{% else %}received{% endif %}">
+                                <p class="text-sm font-semibold">{{ message.sender.username }}:</p>
+                                <p>{{ message.message }}</p>
+                                <p class="text-xs text-gray-500 text-right mt-1">{{ message.sent_at|date:"H:i M d" }}</p>
+                            </div>
+                        {% empty %}
+                            <p class="text-gray-500 text-center">No messages yet. Start a conversation!</p>
+                        {% endfor %}
+                    </div>
+                    <form method="POST" action="{% url 'value:chat_room' %}">
+                        {% csrf_token %}
+                        <div class="flex flex-col gap-2">
+                            <select name="receiver_id" class="border p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <option value="">Select Recipient</option>
+                                {% for user in users_for_chat %}
+                                    <option value="{{ user.id }}">{{ user.username }} ({{ user.role|capfirst }})</option>
+                                {% endfor %}
+                            </select>
+                            <textarea name="message" placeholder="Type your message..." rows="3" class="border p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                            <button type="submit" class="bg-blue-500 text-white p-2 rounded hover:bg-blue-600">Send Message</button>
+                        </div>
+                    </form>
+                </div>
+
+            {% elif active_view == 'group_chat' %}
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h1 class="text-2xl font-bold mb-4">Group Chat</h1>
+                    <div class="chat-container mb-4">
+                        {% for message in group_messages %}
+                            <div class="chat-message-bubble {% if message.sender == request.user %}sent{% else %}received{% endif %}">
+                                <p class="text-sm font-semibold">{{ message.sender.username }}:</p>
+                                <p>{{ message.message }}</p>
+                                <p class="text-xs text-gray-500 text-right mt-1">{{ message.sent_at|date:"H:i M d" }}</p>
+                            </div>
+                        {% empty %}
+                            <p class="text-gray-500 text-center">No group messages yet.</p>
+                        {% endfor %}
+                    </div>
+                    <form method="POST" action="{% url 'value:group_chat' %}">
+                        {% csrf_token %}
+                        <div class="flex flex-col gap-2">
+                            <textarea name="message" placeholder="Type your group message..." rows="3" class="border p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                            <button type="submit" class="bg-blue-500 text-white p-2 rounded hover:bg-blue-600">Send Group Message</button>
+                        </div>
+                    </form>
+                </div>
+
+            {% elif active_view == 'friends_list' %}
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h1 class="text-2xl font-bold mb-4">My Friends</h1>
+                    <table class="min-w-full bg-white">
+                        <thead>
+                            <tr>
+                                <th class="py-2 px-4 border-b">ID</th>
+                                <th class="py-2 px-4 border-b">Friend Username</th>
+                                <th class="py-2 px-4 border-b">Friend Role</th>
+                                <th class="py-2 px-4 border-b">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for friend_entry in friends %} {# Using friend_entry to avoid conflict with 'friends' list name #}
+                                <tr>
+                                    <td class="py-2 px-4 border-b">{{ friend_entry.id }}</td>
+                                    <td class="py-2 px-4 border-b">{{ friend_entry.friend.username }}</td>
+                                    <td class="py-2 px-4 border-b">{{ friend_entry.friend.role|default:"N/A"|capfirst }}</td>
+                                    <td class="py-2 px-4 border-b">
+                                        {# Add actions like view/unfriend if needed #}
+                                        <a href="#" class="text-blue-500 hover:text-blue-700">View Profile</a> |
+                                        <a href="#" class="text-red-500 hover:text-red-700">Unfriend</a>
+                                    </td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="4" class="py-4 px-4 text-center text-gray-500">No friends found.</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% endif %} {# End of active_view conditions #}
+        </div>
+    </div>
+
+    <script src="{% static 'js/fontawesome.js' %}" crossorigin="anonymous"></script>
+</body>
+</html>

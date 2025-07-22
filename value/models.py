@@ -16,6 +16,7 @@ class User(AbstractUser):
 # 🔷 Core models
 class Classroom(models.Model):
     name = models.CharField(max_length=50)
+    capacity = models.IntegerField(default=30)
 
     def __str__(self):
         return self.name
@@ -118,10 +119,12 @@ class EventCategoryType(models.Model):
     name = models.CharField(max_length=50)
 
 
+# in value/models.py
 class Event(models.Model):
-    name = models.CharField(max_length=100)
-    category_type = models.ForeignKey(EventCategoryType, on_delete=models.CASCADE)
+    title = models.CharField(max_length=200)
     date = models.DateField()
+    description = models.TextField(blank=True)
+    # ... other fields ...
 
 
 # 🔷 Payments

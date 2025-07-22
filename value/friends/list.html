@@ -2,9 +2,5 @@
 {% block title %}Friends{% endblock %}
 {% block content %}
 <h2>Friends</h2>
-<ul class="list-group">
-{% for friend in friends %}
-<li class="list-group-item">{{ friend }}</li>
-{% endfor %}
-</ul>
+<ul class="list-group">{% for friend in friends %}<li class="list-group-item">{{ friend }}</li>{% endfor %}</ul>
 {% endblock %}
